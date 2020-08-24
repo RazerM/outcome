@@ -119,3 +119,23 @@ def test_traceback_frame_removal() -> None:
     frames = traceback.extract_tb(exc_info.value.__traceback__)
     functions = [function for _, _, function, _ in frames]
     assert functions[-2:] == ['unwrap', 'raise_ValueError']
+
+
+def test_value_covariance() -> None:
+    """Check that Outcome is covariant over its value type.
+
+    This test is designed to be picked up by mypy so doesn't really need to
+    be executed.
+    """
+
+    class Animal:
+        pass
+
+    class Dog(Animal):
+        pass
+
+    def f1(o: Outcome[Animal]) -> None:
+        assert isinstance(o.unwrap(), Dog)
+
+    o: Outcome[Dog] = Value(Dog())
+    f1(o)  # Mypy error if V is not covariant
